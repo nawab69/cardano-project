@@ -7,7 +7,7 @@ import React, { useEffect, useState } from 'react'
 import { Button, Col, Container, Modal, Row } from 'react-bootstrap'
 import { Transaction } from '@meshsdk/core';
 
-const apply = () => {
+const Apply = () => {
     const viewport = useWindowSize()
     const viewportWidth = viewport?.width
 
@@ -38,13 +38,19 @@ const apply = () => {
         if (wallet) {
             if (selectedToken === 'lovelace') {
                 try {
-                    const depositAddress = 'addr_test1vpvx0sacufuypa2k4sngk7q40zc5c4npl337uusdh64kv0c7e4cxr';
+                    // DEPOSIT ADDRESS from Backend Address
+                    const depositAddress = 'addr_test1qr7d7f2k5cfklygj9ys3zr53prx5jlx8shyz8xm44pz8g9rqqm8m2wrqmmshtflxqym2u05hv27gn0agyel5cp7f8f8qrjhzhc';
                     const tx = new Transaction({ initiator: wallet })
                     tx.sendLovelace(depositAddress, (amount * 1000000).toString());
                     const unsignedTx = await tx.build();
                     const signedTx = await wallet.signTx(unsignedTx);
                     const txHash = await wallet.submitTx(signedTx);
                     console.log({ txHash })
+
+                    if (txHash) {
+                        alert('Tokens sent successfully');
+                        setAddTokenModalShow(false)
+                    }
 
                     //TODO: Send txHash and amount to backend to save in database
                 } catch (error) {
@@ -160,25 +166,28 @@ const apply = () => {
 
                 <div className='apply-div special-div'>Step 2</div>
                 <div className='apply-div'>Through the manage tokens page, add tokens.</div>
-                <Row className='my-4'>
-                    <Col lg="4">
-                        <Row>
-                            <Row>
-                                <select onChange={(e) => setSelectedToken(e.target.value)}>
-                                    <option value=''>Select Token</option>
-                                    <option value='lovelace'>ADA</option>
-                                    <option value='WETH'>WETH</option>
-                                    <option value='USDT'>USDT</option>
-                                </select>
-                            </Row>
 
-                            <Button onClick={() => setAddTokenModalShow(true)}>
-                                Add Token
-                            </Button>
+                {
+                    connected ? (
+                        <Row className='my-4'>
+                            <Col lg="4">
+                                <Row>
+                                    <Row>
+                                        <select onChange={(e) => setSelectedToken(e.target.value)}>
+                                            <option value='lovelace'>ADA</option>
+                                        </select>
+                                    </Row>
+
+                                    <Button onClick={() => setAddTokenModalShow(true)}>
+                                        Add Token
+                                    </Button>
+                                </Row>
+                            </Col>
+
                         </Row>
-                    </Col>
+                    ) : (<></>)
+                }
 
-                </Row>
                 <Modal
                     size="sm"
                     aria-labelledby="contained-modal-title-vcenter"
@@ -195,7 +204,6 @@ const apply = () => {
                         <input type="number" value={amount} onChange={(e) => { setAmount(e.target.value) }} placeholder='Amount' />
                         <Button onClick={handleDeposit}>Deposit</Button>
                     </Modal.Body>
-
                 </Modal>
 
 
@@ -213,4 +221,4 @@ const apply = () => {
     )
 }
 
-export default apply
+export default Apply
